@@ -4,6 +4,7 @@
 
 #include <matrix.hpp>
 #include <random>
+#include <iostream>
 
 bool dimensionsMatchElementWise(const Matrix &m1, const Matrix &m2) {
     return m1.rows == m2.rows && m1.cols == m2.cols;
@@ -13,9 +14,15 @@ bool dimensionsMatchDot(const Matrix &m1, const Matrix &m2) {
     return m1.cols == m2.rows;
 }
 
+Matrix::Matrix() {
+    // Default constructor for a matrix
+    this->rows = 0;
+    this->cols = 0;
+}
+
 Matrix::Matrix(int rows, int cols) {
     // Initialize the data
-    data = MatrixData(rows, Vector(cols, 0.0));
+    data = MatrixData(rows, vector(cols, 0.0));
 
     // Initialize the random number generator
     std::random_device rd;
@@ -54,7 +61,19 @@ Matrix::Matrix(const Matrix &m) {
     this->cols = m.cols;
 }
 
-Matrix::MatrixData Matrix::getData() const {
+// Implement the << operator for printing
+std::ostream& operator<<(std::ostream& os, const Matrix& m) {
+    // Print the matrix
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++)
+            os << m.data[i][j] << " ";
+        os << std::endl;
+    }
+
+    return os;
+}
+
+MatrixData Matrix::getData() const {
     return data;
 }
 
@@ -64,7 +83,7 @@ Matrix Matrix::add(const Matrix &m1, const Matrix &m2) {
         throw std::invalid_argument("The dimensions of the matrices do not match.");
 
     // Initialize the data
-    MatrixData data(m1.rows, Vector(m1.cols, 0.0));
+    MatrixData data(m1.rows, vector(m1.cols, 0.0));
 
     // Add the matrices
     for(int i = 0; i < m1.rows; i++) {
@@ -81,7 +100,7 @@ Matrix Matrix::subtract(const Matrix &m1, const Matrix &m2) {
         throw std::invalid_argument("The dimensions of the matrices do not match.");
 
     // Initialize the data
-    MatrixData data(m1.rows, Vector(m1.cols, 0.0));
+    MatrixData data(m1.rows, vector(m1.cols, 0.0));
 
     // Subtract the matrices
     for(int i = 0; i < m1.rows; i++) {
@@ -99,7 +118,7 @@ Matrix Matrix::multiply(const Matrix &m1, const Matrix &m2) {
         throw std::invalid_argument("The dimensions of the matrices do not match.");
 
     // Initialize the data
-    MatrixData data(m1.rows, Vector(m1.cols, 0.0));
+    MatrixData data(m1.rows, vector(m1.cols, 0.0));
 
     // Multiply the matrices
     for(int i = 0; i < m1.rows; i++) {
@@ -116,7 +135,7 @@ Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
         throw std::invalid_argument("The dimensions of the matrices do not match.");
 
     // Initialize the data
-    MatrixData data(m1.rows, Vector(m2.cols, 0.0));
+    MatrixData data(m1.rows, vector(m2.cols, 0.0));
 
     // Multiply the matrices, using the naive algorithm
     for(int i = 0; i < m1.rows; i++) {
@@ -134,7 +153,7 @@ Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
 
 Matrix Matrix::multiply(double scalar, const Matrix &m) {
     // Initialize the data
-    MatrixData data(m.rows, Vector(m.cols, 0.0));
+    MatrixData data(m.rows, vector(m.cols, 0.0));
 
     // Multiply the matrix by the scalar
     for(int i = 0; i < m.rows; i++) {
@@ -147,7 +166,7 @@ Matrix Matrix::multiply(double scalar, const Matrix &m) {
 
 Matrix Matrix::transpose(const Matrix &m) {
     // Initialize the data
-    MatrixData data(m.cols, Vector(m.rows, 0.0));
+    MatrixData data(m.cols, vector(m.rows, 0.0));
 
     // Transpose the matrix i.e rows become columns and columns become rows
     for(int i = 0; i < m.rows; i++) {
@@ -171,9 +190,17 @@ double Matrix::sum(const Matrix &m) {
     return sum;
 }
             
+void randomInitialize(MatrixData m) {
+    // Initialize the random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-1.0, 1.0);
 
-
-
-
+    // Fill the matrix with random values
+    for (int i = 0; i < m.size(); i++) {
+        for (int j = 0; j < m[0].size(); j++)
+            m[i][j] = dis(gen);
+    }
+}
 
 

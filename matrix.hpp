@@ -3,15 +3,14 @@
 // Description: This file contains the declaration of the Matrix class, which represents a matrix.
 
 #include <vector>
+#include <types.hpp>
 
+using std::vector;
 
 class Matrix {
     public:
-        // Type aliases
-        using Vector = std::vector<double>; // a vector of doubles
-        using MatrixData = std::vector<Vector>; // a vector of vectors of doubles
-
         // Constructor
+        Matrix();
         Matrix(int rows, int cols);
         Matrix(MatrixData data);
         Matrix(const Matrix &m);
@@ -32,6 +31,12 @@ class Matrix {
         static Matrix divide(const Matrix &m, double scalar);
         static Matrix transpose(const Matrix &m);
         static double sum(const Matrix &m);
+        
+        // Random intialization for a bias vector
+        static void randomInitialize(Matrix v);
+
+        // Implement the << operator for printing
+        friend std::ostream& operator<<(std::ostream& os, const Matrix& m);
 
     private:
         MatrixData data;
