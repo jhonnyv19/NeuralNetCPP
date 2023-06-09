@@ -8,21 +8,21 @@
 Net::Net(vector<int> sizes, vector<std::function<Matrix(const Matrix&)>> activations) {
     // Default constructor for a neural network
     this->sizes = sizes;
-    this->num_layers = sizes.size();
+    this->num_layers = sizes.size() - 1;
 
     // Verify that dimensions are valid
     if (num_layers <= 0) {
         throw std::invalid_argument("Invalid dimensions for network");
     }
 
-    if (activations.size() != num_layers - 1) {
+    if (activations.size() != num_layers) {
         std::cout << activations.size() << std::endl;
         std::cout << num_layers << std::endl;
         throw std::invalid_argument("Invalid number of activation functions");
     }
 
     // Initialize the layers
-    for (int i = 1; i < num_layers; i++) {
+    for (int i = 1; i <= num_layers; i++) {
         layers.push_back(Layer(sizes[i - 1], sizes[i], activations[i - 1]));
     }
 
@@ -46,7 +46,7 @@ vector<Matrix> Net::getWeights() const {
     // Return the weights of the network
     vector<Matrix> weights;
 
-    for (int i = 0; i < num_layers - 1; i++) {
+    for (int i = 0; i < num_layers; i++) {
         weights.push_back(layers[i].getWeights());
     }
 

@@ -21,7 +21,7 @@ Layer::Layer(int input_size, int output_size, std::function<Matrix(const Matrix&
 
     // Initialize the weights and biases
     weights = Matrix(input_size, output_size);
-    biases = Matrix(output_size, 0.0);
+    biases = Matrix(output_size, 1);
 
     // Randomly initialize the biases
     Matrix::randomInitialize(biases);
@@ -38,7 +38,7 @@ Layer::~Layer() {
 
 Matrix Layer::forward(Matrix input) const {
     // Forward propagation
-    Matrix z = Matrix::add(Matrix::dot(input, weights), biases);
+    Matrix z = Matrix::add(Matrix::dot(Matrix::transpose(weights), input), biases);
     return activation(z);
 }
 

@@ -133,7 +133,7 @@ Matrix Matrix::multiply(const Matrix &m1, const Matrix &m2) {
 
 Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
-    if (!(m1.rows == m2.rows && m1.cols == m2.cols)) {
+    if (!(m1.cols == m2.rows)) {
         throw std::invalid_argument("Error: Dimensions of matrices do not match for matrix multiplication. "
                                     "Attempted operation on matrices of size [" + std::to_string(m1.rows) + "x" + std::to_string(m1.cols) + "] and [" + std::to_string(m2.rows) + "x" + std::to_string(m2.cols) + "].");
     }
@@ -145,7 +145,7 @@ Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
     // Multiply the matrices, using the naive algorithm
     for(int i = 0; i < m1.rows; i++) {
         for(int j = 0; j < m2.cols; j++) {
-            for(int k = 0; i < m1.cols; k++) {
+            for(int k = 0; k < m1.cols; k++) {
                 // Compute dot product between row i of m1 and column j of m2
                 // Use the += operator to enable cascaded matrix multiplication
                 data[i][j] += m1.data[i][k] * m2.data[k][j];

@@ -15,9 +15,6 @@ int main(int argc, char** argv) {
 
     Net net(sizes, activations);
 
-    // Print the number of layers
-    std::cout << "Number of layers: " << net.getWeights().size() << std::endl;
-
     // Create the training data
     vector<Matrix> inputs;
     for(int i = 0; i < 5; i++) {
@@ -27,8 +24,8 @@ int main(int argc, char** argv) {
     // Only test the forward propagation
     for (int i = 0; i < inputs.size(); i++) {
         Matrix out = net.forward(inputs[i]);
-        std::cout << "Input: " << inputs[i] << std::endl;
-        std::cout << "Output: " << out << std::endl;
+        std::cout << "Input: \n" << inputs[i] << std::endl;
+        std::cout << "Output: \n" << out << std::endl;
     }
 
     return 0;
