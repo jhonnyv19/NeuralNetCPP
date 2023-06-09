@@ -2,8 +2,11 @@
 // Last modified: 06/09/2023
 // Description: This file contains the declaration of the Matrix class, which represents a matrix.
 
+#ifndef MATRIX_HPP
+#define MATRIX_HPP
+
 #include <vector>
-#include <types.hpp>
+#include "types.hpp"
 
 using std::vector;
 
@@ -33,7 +36,7 @@ class Matrix {
         static double sum(const Matrix &m);
         
         // Random intialization for a bias vector
-        static void randomInitialize(Matrix v);
+        static Matrix randomInitialize(Matrix m);
 
         // Implement the << operator for printing
         friend std::ostream& operator<<(std::ostream& os, const Matrix& m);
@@ -42,3 +45,5 @@ class Matrix {
         MatrixData data;
 
 };
+
+#endif

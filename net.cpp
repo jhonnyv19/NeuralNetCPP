@@ -3,8 +3,9 @@
 // Description: This file contains the implementation of the class Net, which represents a neural network.
 
 #include "net.hpp"
+#include <iostream>
 
-Net::Net(vector<int> sizes) {
+Net::Net(vector<int> sizes, vector<std::function<Matrix(const Matrix&)>> activations) {
     // Default constructor for a neural network
     this->sizes = sizes;
     this->num_layers = sizes.size();
@@ -15,6 +16,8 @@ Net::Net(vector<int> sizes) {
     }
 
     if (activations.size() != num_layers - 1) {
+        std::cout << activations.size() << std::endl;
+        std::cout << num_layers << std::endl;
         throw std::invalid_argument("Invalid number of activation functions");
     }
 

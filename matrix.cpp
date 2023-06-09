@@ -2,7 +2,7 @@
 // Last modified: 06/09/2023
 // Description: This file contains the declaration of the Matrix class, which represents a matrix.
 
-#include <matrix.hpp>
+#include "matrix.hpp"
 #include <random>
 #include <iostream>
 
@@ -22,7 +22,7 @@ Matrix::Matrix() {
 
 Matrix::Matrix(int rows, int cols) {
     // Initialize the data
-    data = MatrixData(rows, vector(cols, 0.0));
+    MatrixData data = MatrixData(rows, vector<double>(cols, 0.0));
 
     // Initialize the random number generator
     std::random_device rd;
@@ -79,11 +79,13 @@ MatrixData Matrix::getData() const {
 
 Matrix Matrix::add(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
-    if (!dimensionsMatchElementWise(m1, m2))
-        throw std::invalid_argument("The dimensions of the matrices do not match.");
+    if (!(m1.rows == m2.rows && m1.cols == m2.cols)) {
+        throw std::invalid_argument("Error: Dimensions of matrices do not match for element-wise addition. "
+                                    "Attempted operation on matrices of size [" + std::to_string(m1.rows) + "x" + std::to_string(m1.cols) + "] and [" + std::to_string(m2.rows) + "x" + std::to_string(m2.cols) + "].");
+    }
 
     // Initialize the data
-    MatrixData data(m1.rows, vector(m1.cols, 0.0));
+    MatrixData data(m1.rows, vector<double>(m1.cols, 0.0));
 
     // Add the matrices
     for(int i = 0; i < m1.rows; i++) {
@@ -100,7 +102,7 @@ Matrix Matrix::subtract(const Matrix &m1, const Matrix &m2) {
         throw std::invalid_argument("The dimensions of the matrices do not match.");
 
     // Initialize the data
-    MatrixData data(m1.rows, vector(m1.cols, 0.0));
+    MatrixData data(m1.rows, vector<double>(m1.cols, 0.0));
 
     // Subtract the matrices
     for(int i = 0; i < m1.rows; i++) {
@@ -118,7 +120,7 @@ Matrix Matrix::multiply(const Matrix &m1, const Matrix &m2) {
         throw std::invalid_argument("The dimensions of the matrices do not match.");
 
     // Initialize the data
-    MatrixData data(m1.rows, vector(m1.cols, 0.0));
+    MatrixData data(m1.rows, vector<double>(m1.cols, 0.0));
 
     // Multiply the matrices
     for(int i = 0; i < m1.rows; i++) {
@@ -131,11 +133,14 @@ Matrix Matrix::multiply(const Matrix &m1, const Matrix &m2) {
 
 Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
-    if (!dimensionsMatchDot(m1, m2))
-        throw std::invalid_argument("The dimensions of the matrices do not match.");
+    if (!(m1.rows == m2.rows && m1.cols == m2.cols)) {
+        throw std::invalid_argument("Error: Dimensions of matrices do not match for matrix multiplication. "
+                                    "Attempted operation on matrices of size [" + std::to_string(m1.rows) + "x" + std::to_string(m1.cols) + "] and [" + std::to_string(m2.rows) + "x" + std::to_string(m2.cols) + "].");
+    }
+
 
     // Initialize the data
-    MatrixData data(m1.rows, vector(m2.cols, 0.0));
+    MatrixData data(m1.rows, vector<double>(m2.cols, 0.0));
 
     // Multiply the matrices, using the naive algorithm
     for(int i = 0; i < m1.rows; i++) {
@@ -153,7 +158,7 @@ Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
 
 Matrix Matrix::multiply(double scalar, const Matrix &m) {
     // Initialize the data
-    MatrixData data(m.rows, vector(m.cols, 0.0));
+    MatrixData data(m.rows, vector<double>(m.cols, 0.0));
 
     // Multiply the matrix by the scalar
     for(int i = 0; i < m.rows; i++) {
@@ -166,7 +171,7 @@ Matrix Matrix::multiply(double scalar, const Matrix &m) {
 
 Matrix Matrix::transpose(const Matrix &m) {
     // Initialize the data
-    MatrixData data(m.cols, vector(m.rows, 0.0));
+    MatrixData data(m.cols, vector<double>(m.rows, 0.0));
 
     // Transpose the matrix i.e rows become columns and columns become rows
     for(int i = 0; i < m.rows; i++) {
@@ -190,17 +195,23 @@ double Matrix::sum(const Matrix &m) {
     return sum;
 }
             
-void randomInitialize(MatrixData m) {
+Matrix Matrix::randomInitialize(Matrix m) {
+    // Get the data from the matrix
+    MatrixData data = m.getData();
+    
+
     // Initialize the random number generator
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(-1.0, 1.0);
 
     // Fill the matrix with random values
-    for (int i = 0; i < m.size(); i++) {
-        for (int j = 0; j < m[0].size(); j++)
-            m[i][j] = dis(gen);
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++)
+            data[i][j] = dis(gen);
     }
+
+    return Matrix(data);
 }
 
 

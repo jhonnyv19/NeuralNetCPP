@@ -2,11 +2,14 @@
 // Last modified: 06/09/2023
 // Description: This file contains the implementation of the class NeuralNetwork, which represents a neural network.
 
+#ifndef NET_HPP
+#define NET_HPP
+
 #include "layer.hpp"
 
 class Net {
     public:
-        Net(vector<int> sizes);
+        Net(vector<int> sizes, vector<std::function<Matrix(const Matrix&)>> activations);
         ~Net();
 
         // Dimensions of the network
@@ -34,3 +37,5 @@ class Net {
         vector<Layer> layers;
 
 };
+
+#endif

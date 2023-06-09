@@ -2,6 +2,9 @@
 // Last modified: 06/09/2023
 // Description: This file contains the declaration of the class Layer, which represents a layer of neurons in a neural network.
 
+#ifndef LAYER_HPP
+#define LAYER_HPP
+
 #include "matrix.hpp"
 #include <vector>
 #include <functional>
@@ -41,3 +44,5 @@ class Layer {
         // Activation function for this layer
         std::function<Matrix(const Matrix&)> activation;
 };
+
+#endif

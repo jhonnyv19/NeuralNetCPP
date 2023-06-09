@@ -3,16 +3,26 @@
 // Description: The main function for the training of a neural network.
 
 #include <iostream>
-#include <net.hpp>
+#include "activations.hpp"
+#include "net.hpp"
 
 int main(int argc, char** argv) {
-    // Create the network
-    vector<int> sizes = {2, 3, 1};
-    Net net(sizes);
+    // Create the network, first and last arguments are the input and output sizes, respectively
+    vector<int> sizes = {2, 3, 2};
+
+    // Apply relu activation to the first layer and sigmoid activation to the second layer
+    vector<std::function<Matrix(const Matrix&)>> activations = {relu, sigmoid};
+
+    Net net(sizes, activations);
+
+    // Print the number of layers
+    std::cout << "Number of layers: " << net.getWeights().size() << std::endl;
 
     // Create the training data
-    vector<Matrix> inputs = {Matrix({{0, 0}}), Matrix({{0, 1}}), Matrix({{1, 0}}), Matrix({{1, 1}})};
-    vector<Matrix> targets = {Matrix({{0}}), Matrix({{1}}), Matrix({{1}}), Matrix({{0}})};
+    vector<Matrix> inputs;
+    for(int i = 0; i < 5; i++) {
+        inputs.push_back(Matrix(2, 1));
+    }
 
     // Only test the forward propagation
     for (int i = 0; i < inputs.size(); i++) {
