@@ -15,7 +15,7 @@ class Layer {
     public:
         // Constructors
         Layer();
-        Layer(int input_size, int output_size, std::function<Matrix(const Matrix&)> activation);
+        Layer(int input_size, int output_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime);
         ~Layer();
 
         // Dimensions of the layer
@@ -23,26 +23,38 @@ class Layer {
         int output_size;
 
         // Forward propagation
-        Matrix forward(Matrix input) const;
+        Matrix forward(Matrix input);
 
         // Backward propagation
-        void backward(Matrix input, Matrix output, Matrix target);
+        void backward(Matrix y_hat, Matrix y, Matrix input); 
 
         // Getter methods for the weights and biases
         Matrix getWeights() const;
         Matrix getBiases() const;
+        Matrix getActivations() const;
+
+        // Update the weights and biases
+        void updateWeights(double learning_rate, Matrix d_weights);
+        void updateBiases(double learning_rate, Matrix d_biases);
+
+        void updateActivations(Matrix activations);
+
+        // Activation function for this layer
+        std::function<Matrix(const Matrix&)> activation;
+        std::function<Matrix(const Matrix&)> activation_prime;
 
 
     private:
 
+        // Activations of the neurons in this layer
+        Matrix activations;
+        
         // Each layer L has a matrix of weights W that represent the connections between layer L -1 and layer L
         Matrix weights;
 
         // Each layer L has a vector of biases b that represent the biases of the neurons in layer L
         Matrix biases;
 
-        // Activation function for this layer
-        std::function<Matrix(const Matrix&)> activation;
 };
 
 #endif

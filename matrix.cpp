@@ -61,6 +61,11 @@ Matrix::Matrix(const Matrix &m) {
     this->cols = m.cols;
 }
 
+std::string Matrix::shape() const {
+    // Return the shape of the matrix
+    return "[" + std::to_string(this->rows) + "x" + std::to_string(this->cols) + "]";
+}
+
 // Implement the << operator for printing
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     // Print the matrix

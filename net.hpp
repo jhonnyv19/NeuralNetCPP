@@ -9,7 +9,7 @@
 
 class Net {
     public:
-        Net(vector<int> sizes, vector<std::function<Matrix(const Matrix&)>> activations);
+        Net(vector<int> sizes, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes);
         ~Net();
 
         // Dimensions of the network
@@ -24,13 +24,16 @@ class Net {
         vector<Matrix> getBiases() const;
 
         // Forward propagation
-        Matrix forward(Matrix input) const;
+        Matrix forward(Matrix input);
 
         // Backward propagation
         void backward(Matrix input, Matrix output, Matrix target);
 
         // Update the weights and biases
         void updateWeights(double learning_rate);
+
+        // Learning rate
+        double learning_rate;
 
     private:
         // Layers of the network

@@ -25,6 +25,9 @@ class Matrix {
         // Getter method for the data
         MatrixData getData() const;
 
+        // Getter method to print the shape of the matrix
+        std::string shape() const;
+
         // Matrix operations
         static Matrix add(const Matrix &m1, const Matrix &m2);
         static Matrix subtract(const Matrix &m1, const Matrix &m2);
