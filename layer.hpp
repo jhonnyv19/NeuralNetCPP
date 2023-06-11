@@ -32,6 +32,7 @@ class Layer {
         Matrix getWeights() const;
         Matrix getBiases() const;
         Matrix getActivations() const;
+        Matrix getZ() const;
 
         // Update the weights and biases
         void updateWeights(double learning_rate, Matrix d_weights);
@@ -46,8 +47,11 @@ class Layer {
 
     private:
 
+        // Value of neurons before the activation function is applied
+        Matrix z;
+
         // Activations of the neurons in this layer
-        Matrix activations;
+        Matrix a;
         
         // Each layer L has a matrix of weights W that represent the connections between layer L -1 and layer L
         Matrix weights;

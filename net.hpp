@@ -9,7 +9,7 @@
 
 class Net {
     public:
-        Net(vector<int> sizes, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes);
+        Net(vector<int> sizes, double learning_rate, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes);
         ~Net();
 
         // Dimensions of the network

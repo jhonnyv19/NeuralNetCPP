@@ -15,6 +15,19 @@ Matrix sigmoid(const Matrix& mat) {
     return Matrix(result);
 }
 
+// Derivative of the sigmoid function with respect to the input
+Matrix sigmoid_prime(const Matrix& mat) {
+    // Apply the derivative of the sigmoid function to each element of the matrix
+    MatrixData result = mat.getData();
+    Matrix sig = sigmoid(mat);
+    for (int i = 0; i < mat.rows; i++) {
+        for (int j = 0; j < mat.cols; j++)
+            result[i][j] = sig.getData()[i][j] * (1 - sig.getData()[i][j]);
+    }
+
+    return Matrix(result);
+}
+
 Matrix relu(const Matrix& mat) {
     // Apply the relu function to each element of the matrix
     MatrixData result = mat.getData();
@@ -22,6 +35,19 @@ Matrix relu(const Matrix& mat) {
         for (int j = 0; j < mat.cols; j++) {
             result[i][j] = std::max(0.0, mat.getData()[i][j]);
         }
+    }
+
+    return Matrix(result);
+}
+
+// Derivative of the relu function
+Matrix relu_prime(const Matrix& mat) {
+    // Apply the derivative of the relu function to each element of the matrix
+    MatrixData result = mat.getData();
+    Matrix rel = relu(mat);
+    for (int i = 0; i < mat.rows; i++) {
+        for (int j = 0; j < mat.cols; j++)
+            result[i][j] = rel.getData()[i][j] > 0 ? 1 : 0;
     }
 
     return Matrix(result);
@@ -46,46 +72,8 @@ Matrix softmax(const Matrix& mat) {
     }
 
     // Print the result before and after the softmax
-    std::cout << "Before softmax: \n" << mat << std::endl;
-    std::cout << "After softmax: \n" << Matrix(result) << std::endl;
-
-    return Matrix(result);
-}
-
-// Multi class cross entropy loss function
-double cross_entropy_loss(const Matrix& y, const Matrix& y_hat) {
-    // Calculate the loss
-    double loss = 0.0;
-    for (int i = 0; i < y.rows; i++) {
-        for (int j = 0; j < y.cols; j++)
-            loss += y.getData()[i][j] * std::log(y_hat.getData()[i][j]);
-    }
-
-    return -loss;
-}
-
-// Derivative of the sigmoid function
-Matrix sigmoid_prime(const Matrix& mat) {
-    // Apply the derivative of the sigmoid function to each element of the matrix
-    MatrixData result = mat.getData();
-    Matrix sig = sigmoid(mat);
-    for (int i = 0; i < mat.rows; i++) {
-        for (int j = 0; j < mat.cols; j++)
-            result[i][j] = sig.getData()[i][j] * (1 - sig.getData()[i][j]);
-    }
-
-    return Matrix(result);
-}
-
-// Derivative of the relu function
-Matrix relu_prime(const Matrix& mat) {
-    // Apply the derivative of the relu function to each element of the matrix
-    MatrixData result = mat.getData();
-    Matrix rel = relu(mat);
-    for (int i = 0; i < mat.rows; i++) {
-        for (int j = 0; j < mat.cols; j++)
-            result[i][j] = rel.getData()[i][j] > 0 ? 1 : 0;
-    }
+    // std::cout << "Before softmax: \n" << mat << std::endl;
+    // std::cout << "After softmax: \n" << Matrix(result) << std::endl;
 
     return Matrix(result);
 }
@@ -101,6 +89,18 @@ Matrix softmax_prime(const Matrix& mat) {
     }
 
     return Matrix(result);
+}
+
+// Multi class cross entropy loss function
+double cross_entropy_loss(const Matrix& y, const Matrix& y_hat) {
+    // Calculate the loss
+    double loss = 0.0;
+    for (int i = 0; i < y.rows; i++) {
+        for (int j = 0; j < y.cols; j++)
+            loss += y.getData()[i][j] * std::log(y_hat.getData()[i][j]);
+    }
+
+    return -loss;
 }
 
 // Derivative of the cross entropy loss function, assuming softmax is applied

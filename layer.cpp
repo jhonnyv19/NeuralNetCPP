@@ -23,15 +23,13 @@ Layer::Layer(int input_size, int output_size, std::function<Matrix(const Matrix&
     weights = Matrix(input_size, output_size);
     biases = Matrix(output_size, 1);
 
-    // Randomly initialize the biases
-    Matrix::randomInitialize(biases);
-
     // Initialize the activation function and its derivative
     this->activation = activation;
     this->activation_prime = activation_prime;
 
     // Initialize the activations
-    activations = Matrix(output_size, 1);
+    a = Matrix(output_size, 1);
+    z = Matrix(output_size, 1);
 
 }
 
@@ -47,7 +45,8 @@ Matrix Layer::forward(Matrix input) {
     // Apply the activation function and save the activations
     Matrix a = activation(z);
 
-    this->activations = a;
+    this->a = a;
+    this->z = z;
 
     return a;
 }
@@ -71,5 +70,9 @@ Matrix Layer::getBiases() const {
 }
 
 Matrix Layer::getActivations() const {
-    return activations;
+    return a;
+}
+
+Matrix Layer::getZ() const {
+    return z;
 }

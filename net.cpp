@@ -6,10 +6,11 @@
 #include "activations.hpp"
 #include <iostream>
 
-Net::Net(vector<int> sizes, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes) {
+Net::Net(vector<int> sizes, double learning_rate, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes) {
     // Default constructor for a neural network
     this->sizes = sizes;
     this->num_layers = sizes.size() - 1;
+    this->learning_rate = learning_rate;
 
     // Verify that dimensions are valid
     if (num_layers <= 0) {
@@ -44,55 +45,55 @@ Matrix Net::forward(Matrix input) {
 }
 
 void Net::backward(Matrix y_hat, Matrix y, Matrix input) {
-    // Calculate derivative of the loss function with respect to the output
-    Matrix d_loss = cross_entropy_loss_prime(y_hat, y);
+    // Calculate derivative of the loss function w.r.t. a
+    Matrix dL_da = cross_entropy_loss_prime(y_hat, y);
 
     for (int i = num_layers - 1; i >= 0; i--) {
         // Debugging
-        std::cout << "Layer: " << i << std::endl;
+        // std::cout << "Layer: " << i << std::endl;
 
-        d_loss = Matrix::multiply(d_loss, layers[i].activation_prime(layers[i].getActivations()));
-        
-        // Print shape of d_loss
-        std::cout << "d_loss: " << d_loss.shape() << std::endl;
+        // Calculate dL_dz = dL_da * da_dz
+        Matrix dL_dz = Matrix::multiply(dL_da, layers[i].activation_prime(layers[i].getZ()));
 
-        // If not the input layer, we need to calculate d_loss for the next layer
-        Matrix d_loss_next_layer;
+        // Print shape of dL_dz
+        // std::cout << "dL_dz: " << dL_dz.shape() << std::endl;
+
+        // If not the input layer, we need to calculate dL/da for the next layer
+        // dL/da = dL/da * da/dz * dz/da
+        Matrix dL_da_next_layer;
         if (i > 0) {
-            std::cout << "d_loss: " << d_loss.shape() << std::endl;
-            d_loss_next_layer = Matrix::dot(layers[i].getWeights(), d_loss);
-
+            dL_da_next_layer = Matrix::dot(layers[i].getWeights(), dL_dz);
         }
 
-        // Step 2b: Compute the Gradients for the Layer's Parameters
+        // Compute the Gradients for the Layer's Parameters
         Matrix d_weights;
-        if (i > 0) {;
-            d_weights = Matrix::dot(Matrix::transpose(layers[i - 1].getActivations()), d_loss);
+        if (i > 0) {
+            d_weights = Matrix::dot(dL_dz, Matrix::transpose(layers[i - 1].getActivations()));
         } else {
-            d_weights = Matrix::dot(Matrix::transpose(input), d_loss);
+            d_weights = Matrix::dot(dL_dz, Matrix::transpose(input));
         }
 
-        // Matrix d_bias = d_loss.sum(0);  // Assume sum function that operates over rows is available
-        MatrixData d_bias = std::vector<std::vector<double>>(d_loss.rows, std::vector<double>(1));
-        for (int j = 0; j < d_loss.rows; j++) {
+        MatrixData d_bias = std::vector<std::vector<double>>(dL_dz.rows, std::vector<double>(1));
+        for (int j = 0; j < dL_dz.rows; j++) {
             double sum = 0;
-            for (int k = 0; k < d_loss.cols; k++) {
-                sum += d_loss.getData()[j][k];
+            for (int k = 0; k < dL_dz.cols; k++) {
+                sum += dL_dz.getData()[j][k];
             }
             d_bias[j][0] = sum;
         }
 
-        // Step 3: Update the Parameters
-        layers[i].updateWeights(learning_rate, d_weights);
+
+        // Once you have the gradients, use them to update the weights and biases (Step 3)
+        layers[i].updateWeights(learning_rate, Matrix::transpose(d_weights));
         layers[i].updateBiases(learning_rate, d_bias);
 
         // Prepare for the next iteration
         if (i > 0) {
-            d_loss = d_loss_next_layer;
+            dL_da = dL_da_next_layer;
         }
-
     }
 }
+
 
 vector<Matrix> Net::getWeights() const {
     // Return the weights of the network
