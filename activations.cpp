@@ -92,15 +92,21 @@ Matrix softmax_prime(const Matrix& mat) {
 }
 
 // Multi class cross entropy loss function
-double cross_entropy_loss(const Matrix& y, const Matrix& y_hat) {
-    // Calculate the loss
-    double loss = 0.0;
-    for (int i = 0; i < y.rows; i++) {
-        for (int j = 0; j < y.cols; j++)
-            loss += y.getData()[i][j] * std::log(y_hat.getData()[i][j]);
+Matrix cross_entropy_loss(const Matrix& y, const Matrix& y_hat) {
+    // Check if dimensions match
+    if (y.rows != y_hat.rows || y.cols != y_hat.cols) {
+        throw std::invalid_argument("Dimensions of y and y_hat do not match.");
     }
 
-    return -loss;
+    // Calculate the loss for each example in the batch
+    MatrixData loss_data(y.rows, std::vector<double>(1, 0.0));
+    for (int i = 0; i < y.rows; i++) {
+        for (int j = 0; j < y.cols; j++) {
+            loss_data[i][0] -= y.getData()[i][j] * std::log(y_hat.getData()[i][j]);
+        }
+    }
+
+    return Matrix(loss_data);
 }
 
 // Derivative of the cross entropy loss function, assuming softmax is applied

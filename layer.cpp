@@ -4,13 +4,15 @@
 
 #include "layer.hpp"
 
+#include <iostream>
+
 Layer::Layer() {
     // Default constructor for a layer
     this->input_size = 0;
     this->output_size = 0;
 }
 
-Layer::Layer(int input_size, int output_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime) {
+Layer::Layer(int input_size, int output_size, int batch_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime) {
     this->input_size = input_size;
     this->output_size = output_size;
 
@@ -28,8 +30,8 @@ Layer::Layer(int input_size, int output_size, std::function<Matrix(const Matrix&
     this->activation_prime = activation_prime;
 
     // Initialize the activations
-    a = Matrix(output_size, 1);
-    z = Matrix(output_size, 1);
+    // a = Matrix(output_size, 1);
+    // z = Matrix(1, output_size);
 
 }
 
@@ -38,25 +40,45 @@ Layer::~Layer() {
 
 }
 
-Matrix Layer::forward(Matrix input) {
+Matrix Layer::forward(const Matrix& input) {
+
+    // Print out the shape of the weights, input, and biases
+    // std::cout << "Weights shape: " << weights.shape() << std::endl;
+    // std::cout << "Input shape: " << input.shape() << std::endl;
+    // std::cout << "Biases shape: " << biases.shape() << std::endl;
+
     // Forward propagation
-    Matrix z = Matrix::add(Matrix::dot(Matrix::transpose(weights), input), biases);
+    // z = X * W + b
+    // X has shape (batch_size, input_size)
+    // W has shape (input_size, output_size)
+    // b has shape (output_size, batch_size)
+    Matrix z = Matrix::dot(input, weights);  // Matrix multiplication with input and weights
+
+    MatrixData z_data = z.getData();
+
+    // Add the biases through broadcasting
+    for (int i = 0; i < z.rows; i++) {
+        for (int j = 0; j < z.cols; j++) {
+            z_data[i][j] += biases.getData()[j][0];
+        }
+    }
 
     // Apply the activation function and save the activations
-    Matrix a = activation(z);
+    Matrix a = activation(Matrix(z_data));
 
     this->a = a;
     this->z = z;
 
     return a;
+
 }
 
-void Layer::updateWeights(double learning_rate, Matrix d_weights) {
+void Layer::updateWeights(double learning_rate, const Matrix& d_weights) {
     // Update the weights and biases
     weights = Matrix::subtract(weights, Matrix::multiply(learning_rate, d_weights));
 }
 
-void Layer::updateBiases(double learning_rate, Matrix d_biases) {
+void Layer::updateBiases(double learning_rate, const Matrix& d_biases) {
     // Update the weights and biases
     biases = Matrix::subtract(biases, Matrix::multiply(learning_rate, d_biases));
 }

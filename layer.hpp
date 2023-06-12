@@ -15,7 +15,7 @@ class Layer {
     public:
         // Constructors
         Layer();
-        Layer(int input_size, int output_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime);
+        Layer(int input_size, int output_size, int batch_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime);
         ~Layer();
 
         // Dimensions of the layer
@@ -23,10 +23,10 @@ class Layer {
         int output_size;
 
         // Forward propagation
-        Matrix forward(Matrix input);
+        Matrix forward(const Matrix& input);
 
         // Backward propagation
-        void backward(Matrix y_hat, Matrix y, Matrix input); 
+        void backward(const Matrix& y_hat, const Matrix& y, const Matrix& input); 
 
         // Getter methods for the weights and biases
         Matrix getWeights() const;
@@ -35,8 +35,8 @@ class Layer {
         Matrix getZ() const;
 
         // Update the weights and biases
-        void updateWeights(double learning_rate, Matrix d_weights);
-        void updateBiases(double learning_rate, Matrix d_biases);
+        void updateWeights(double learning_rate, const Matrix& d_weights);
+        void updateBiases(double learning_rate, const Matrix& d_biases);
 
         void updateActivations(Matrix activations);
 

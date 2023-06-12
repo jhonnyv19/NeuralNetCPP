@@ -37,6 +37,8 @@ class Matrix {
         static Matrix divide(const Matrix &m, double scalar);
         static Matrix transpose(const Matrix &m);
         static double sum(const Matrix &m);
+        static Matrix mean(const Matrix& m, int axis);
+        Matrix slice(int start_row, int end_row) const;
         
         // Random intialization for a bias vector
         static Matrix randomInitialize(Matrix m);

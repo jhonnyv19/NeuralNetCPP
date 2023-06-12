@@ -140,6 +140,24 @@ Matrix Matrix::multiply(const Matrix &m1, const Matrix &m2) {
     return Matrix(data);
 }
 
+Matrix Matrix::divide(const Matrix &m1, double scalar) {
+
+    if (scalar == 0.0) {
+        throw std::invalid_argument("Cannot divide by zero!");
+    }
+
+    // Initialize the data
+    MatrixData data(m1.rows, vector<double>(m1.cols, 0.0));
+
+    // Divide the matrix
+    for(int i = 0; i < m1.rows; i++) {
+        for(int j = 0; j < m1.cols; j++)
+            data[i][j] = m1.data[i][j] / scalar;
+    }
+
+    return Matrix(data);
+}
+
 Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
     if (!(m1.cols == m2.rows)) {
@@ -203,6 +221,62 @@ double Matrix::sum(const Matrix &m) {
 
     return sum;
 }
+
+Matrix Matrix::mean(const Matrix& m, int axis) {
+    // Initialize the data
+    MatrixData data;
+
+    // Check the axis
+    if(axis == 0) { // Mean of each column
+        data = MatrixData(1, vector<double>(m.cols, 0.0));
+
+        for(int i = 0; i < m.rows; i++) {
+            for(int j = 0; j < m.cols; j++) {
+                data[0][j] += m.data[i][j];
+            }
+        }
+
+        for(int j = 0; j < m.cols; j++) {
+            data[0][j] /= m.rows;
+        }
+
+    } else if(axis == 1) { // Mean of each row
+        data = MatrixData(m.rows, vector<double>(1, 0.0));
+
+        for(int i = 0; i < m.rows; i++) {
+            for(int j = 0; j < m.cols; j++) {
+                data[i][0] += m.data[i][j];
+            }
+            data[i][0] /= m.cols;
+        }
+    } else {
+        throw std::invalid_argument("Error: Invalid axis for mean. Only 0 and 1 are accepted.");
+    }
+
+    return Matrix(data);
+}
+
+
+Matrix Matrix::slice(int start_row, int end_row) const {
+    // Check if start_row and end_row are within the range
+    if (start_row < 0 || start_row >= rows || end_row < 0 || end_row > rows || start_row > end_row) {
+        throw std::invalid_argument("Error: Invalid slice indices.");
+    }
+    
+    // Create a new MatrixData to hold the sliced data
+    MatrixData sliced_data(end_row - start_row, std::vector<double>(cols, 0.0));
+    
+    // Copy the data from the specified rows into the new MatrixData
+    for (int i = start_row; i < end_row; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            sliced_data[i - start_row][j] = data[i][j];
+        }
+    }
+    
+    // Return a new Matrix created from the sliced data
+    return Matrix(sliced_data);
+}
+
             
 Matrix Matrix::randomInitialize(Matrix m) {
     // Get the data from the matrix
