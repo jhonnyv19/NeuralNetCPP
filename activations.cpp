@@ -53,30 +53,28 @@ Matrix relu_prime(const Matrix& mat) {
     return Matrix(result);
 }
 
-// Softmax activation function
+// Softmax activation function 
 Matrix softmax(const Matrix& mat) {
-    // Apply the softmax function to each element of the matrix
-    MatrixData result = mat.getData();
-    double sum = 0.0;
+    // Apply the softmax function to each row of the matrix
+    MatrixData result(mat.rows, std::vector<double>(mat.cols, 0.0));
+
     for (int i = 0; i < mat.rows; i++) {
+        // Compute the sum of exp of every element in the row
+        double sum = 0.0;
         for (int j = 0; j < mat.cols; j++) {
             result[i][j] = std::exp(mat.getData()[i][j]);
             sum += result[i][j];
         }
-    }
 
-    // Divide each element by the sum
-    for (int i = 0; i < mat.rows; i++) {
-        for (int j = 0; j < mat.cols; j++)
+        // Divide every element in the row by the sum
+        for (int j = 0; j < mat.cols; j++) {
             result[i][j] /= sum;
+        }
     }
-
-    // Print the result before and after the softmax
-    // std::cout << "Before softmax: \n" << mat << std::endl;
-    // std::cout << "After softmax: \n" << Matrix(result) << std::endl;
 
     return Matrix(result);
 }
+
 
 // Derivative of the softmax function
 Matrix softmax_prime(const Matrix& mat) {

@@ -6,11 +6,12 @@
 #include "activations.hpp"
 #include <iostream>
 
-Net::Net(vector<int> sizes, double learning_rate, int batch_size, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes) {
+Net::Net(vector<int> sizes, double learning_rate, int batch_size, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes, bool using_softmax) {
     // Default constructor for a neural network
     this->sizes = sizes;
     this->num_layers = sizes.size() - 1;
     this->learning_rate = learning_rate;
+    this->using_softmax = using_softmax;
 
     // Verify that dimensions are valid
     if (num_layers <= 0) {
@@ -25,9 +26,14 @@ Net::Net(vector<int> sizes, double learning_rate, int batch_size, vector<std::fu
 
     // Initialize the layers
     for (int i = 1; i <= num_layers; i++) {
-        layers.push_back(Layer(sizes[i - 1], sizes[i], batch_size, activations[i - 1], activation_primes[i - 1]));
-    }
+        // If the layer is the output layer, pass true to the constructor
+        if (i == num_layers) {
+            layers.push_back(Layer(sizes[i - 1], sizes[i], batch_size, activations[i - 1], activation_primes[i - 1], true));
+        } else {
+            layers.push_back(Layer(sizes[i - 1], sizes[i], batch_size, activations[i - 1], activation_primes[i - 1], false));
+        }
 
+    }
 }
 
 Net::~Net() {
@@ -53,7 +59,7 @@ Matrix Net::forward(Matrix& input) {
 
 void Net::backward(const Matrix& y_hat, const Matrix& y, const Matrix& input) {
     // Calculate derivative of the loss function w.r.t. a
-    Matrix dL_da = cross_entropy_loss_prime(y_hat, y);
+    Matrix dL_da = cross_entropy_loss_prime(y, y_hat);
 
     // Print shape of dL_da
     // std::cout << "dL_da shape: " << dL_da.shape() << std::endl;
@@ -61,15 +67,24 @@ void Net::backward(const Matrix& y_hat, const Matrix& y, const Matrix& input) {
     int batch_size = y_hat.rows;
 
     for (int i = num_layers - 1; i >= 0; i--) {
+        Matrix dL_dz;
 
-        // Calculate dL_dz = dL_da * da_dz
-        Matrix da_dz = layers[i].activation_prime(layers[i].getZ());
+        if (i == num_layers - 1 && layers[i].isSoftmax()) {
+            dL_dz = dL_da;
+        } else {
+            Matrix da_dz = layers[i].activation_prime(layers[i].getZ());
+            dL_dz = Matrix::multiply(dL_da, da_dz);
+        }
 
-        // Print shape of da_dz and dL_da
-        // std::cout << "da_dz shape: " << da_dz.shape() << std::endl;
-        // std::cout << "dL_da shape: " << dL_da.shape() << std::endl;
 
-        Matrix dL_dz = Matrix::multiply(dL_da, da_dz);
+        // // Calculate dL_dz = dL_da * da_dz
+        // Matrix da_dz = layers[i].activation_prime(layers[i].getZ());
+
+        // // Print shape of da_dz and dL_da
+        // // std::cout << "da_dz shape: " << da_dz.shape() << std::endl;
+        // // std::cout << "dL_da shape: " << dL_da.shape() << std::endl;
+
+        // Matrix dL_dz = Matrix::multiply(dL_da, da_dz);
 
         // If not the input layer, we need to calculate dL/da for the next layer
 
@@ -96,12 +111,19 @@ void Net::backward(const Matrix& y_hat, const Matrix& y, const Matrix& input) {
         // Average the gradients
         d_weights = Matrix::divide(d_weights, (double)batch_size);
 
+        // Print weights and d_weights, d_bias
+        // std::cout << "Weights: " << layers[i].getWeights() << std::endl;
+        // std::cout << "Bias: " << layers[i].getBiases() << std::endl;
+        // std::cout << "d_weights: " << d_weights << std::endl;
+        // std::cout << "d_bias: " << Matrix::transpose(Matrix::mean(dL_dz, 0)) << std::endl;
+
         // Calculate the gradient of the bias, which is just the mean of dL_dz across the batch dimension
         Matrix d_bias = Matrix::transpose(Matrix::mean(dL_dz, 0));  // Assuming axis argument represents the axis along which to compute the mean
 
-
         // Shape of d_bias
         // std::cout << "d_bias shape: " << d_bias.shape() << std::endl;
+
+        
 
         // Update the Parameters
         layers[i].updateWeights(learning_rate, d_weights);

@@ -27,7 +27,7 @@ Matrix::Matrix(int rows, int cols) {
     // Initialize the random number generator
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(-0.5, 0.5);
+    std::uniform_real_distribution<> dis(-1.0, 1.0);
 
     // Fill the matrix with random values
     for (int i = 0; i < rows; i++) {
@@ -291,6 +291,25 @@ Matrix Matrix::randomInitialize(Matrix m) {
     // Fill the matrix with random values
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++)
+            data[i][j] = dis(gen);
+    }
+
+    return Matrix(data);
+}
+
+// Create matrix of random values from a normal distribution, of a specified shape
+Matrix Matrix::randomNormal(int rows, int cols, double mean, double stddev) {
+    // Initialize the random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<> dis(mean, stddev);
+
+    // Initialize the data
+    MatrixData data(rows, vector<double>(cols, 0.0));
+
+    // Fill the matrix with random values
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++)
             data[i][j] = dis(gen);
     }
 

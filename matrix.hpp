@@ -43,6 +43,9 @@ class Matrix {
         // Random intialization for a bias vector
         static Matrix randomInitialize(Matrix m);
 
+        // Create matrix of random values from a normal distribution, of a specified shape
+        static Matrix randomNormal(int rows, int cols, double mean, double stddev);
+
         // Implement the << operator for printing
         friend std::ostream& operator<<(std::ostream& os, const Matrix& m);
 

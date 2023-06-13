@@ -15,7 +15,7 @@ class Layer {
     public:
         // Constructors
         Layer();
-        Layer(int input_size, int output_size, int batch_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime);
+        Layer(int input_size, int output_size, int batch_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime, bool is_softmax);
         ~Layer();
 
         // Dimensions of the layer
@@ -33,6 +33,7 @@ class Layer {
         Matrix getBiases() const;
         Matrix getActivations() const;
         Matrix getZ() const;
+        bool isSoftmax() const;
 
         // Update the weights and biases
         void updateWeights(double learning_rate, const Matrix& d_weights);
@@ -58,6 +59,9 @@ class Layer {
 
         // Each layer L has a vector of biases b that represent the biases of the neurons in layer L
         Matrix biases;
+
+        // Boolean to check if layer is using softmax activation
+        bool softmax;
 
 };
 

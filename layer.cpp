@@ -12,9 +12,10 @@ Layer::Layer() {
     this->output_size = 0;
 }
 
-Layer::Layer(int input_size, int output_size, int batch_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime) {
+Layer::Layer(int input_size, int output_size, int batch_size, std::function<Matrix(const Matrix&)> activation, std::function<Matrix(const Matrix&)> activation_prime, bool is_softmax) {
     this->input_size = input_size;
     this->output_size = output_size;
+    this->softmax = is_softmax;
 
     // Verify that dimensions are valid
     if (input_size <= 0 || output_size <= 0) {
@@ -64,8 +65,10 @@ Matrix Layer::forward(const Matrix& input) {
     }
 
     // Apply the activation function and save the activations
+    z = Matrix(z_data);
     Matrix a = activation(Matrix(z_data));
 
+    // Save the activations and z values
     this->a = a;
     this->z = z;
 
@@ -97,4 +100,8 @@ Matrix Layer::getActivations() const {
 
 Matrix Layer::getZ() const {
     return z;
+}
+
+bool Layer::isSoftmax() const {
+    return softmax;
 }

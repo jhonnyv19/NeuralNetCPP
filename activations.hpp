@@ -11,7 +11,7 @@ Matrix softmax_prime(const Matrix& m);
 Matrix relu_prime(const Matrix& m);
 Matrix sigmoid_prime(const Matrix& m);
 Matrix sigmoid(const Matrix& m);
-Matrix cross_entropy_loss(const Matrix& m1, const Matrix& m2);
-Matrix cross_entropy_loss_prime(const Matrix& m1, const Matrix& m2);
+Matrix cross_entropy_loss(const Matrix& y, const Matrix& y_hat);
+Matrix cross_entropy_loss_prime(const Matrix& y, const Matrix& y_hat);
 
 #endif // ACTIVATIONS_HPP

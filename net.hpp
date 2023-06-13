@@ -9,7 +9,7 @@
 
 class Net {
     public:
-        Net(vector<int> sizes, double learning_rate, int batch_size, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes);
+        Net(vector<int> sizes, double learning_rate, int batch_size, vector<std::function<Matrix(const Matrix&)>> activations, vector<std::function<Matrix(const Matrix&)>> activation_primes, bool using_softmax);
         ~Net();
 
         // Dimensions of the network
@@ -38,6 +38,9 @@ class Net {
     private:
         // Layers of the network
         vector<Layer> layers;
+
+        // Using softmax?
+        bool using_softmax;
 
 };
 
