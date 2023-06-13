@@ -24,14 +24,14 @@ Hyperparameters can be changed in the main.cpp file for now, but I plan to add c
 
 ## Results
 
-Epoch 1 Average training loss: 5.39656
-Epoch 2 Average training loss: 1.9768
-Epoch 3 Average training loss: 1.47215
-Epoch 4 Average training loss: 1.21528
-Epoch 5 Average training loss: 1.04942
+Epoch 1 Average training loss: 5.39656  
+Epoch 2 Average training loss: 1.9768  
+Epoch 3 Average training loss: 1.47215  
+Epoch 4 Average training loss: 1.21528  
+Epoch 5 Average training loss: 1.04942  
 
 Testing on *data/mnist_test.csv*:
-Average batch accuracy over test set: 0.866687
-Average batch loss over test set: 0.96839
+Average batch accuracy over test set: 0.866687  
+Average batch loss over test set: 0.96839  
 *Total testing accuracy: 0.8653*
 
