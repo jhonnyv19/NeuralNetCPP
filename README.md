@@ -10,7 +10,7 @@ Place the two csv files (mnist_train.csv & mnist_test.csv) in a folder called da
 
 To compile you can use the following command:
 ``` 
-clang++ -O3 -std=c++17 -o net layer.cpp matrix.cpp net.cpp main.cpp activations.cpp 
+gcc++ -O3 -std=c++17 -o net layer.cpp matrix.cpp net.cpp main.cpp activations.cpp 
 ```
 
 I plan on adding a makefile in the future, but for now this will do.
@@ -33,5 +33,5 @@ Epoch 5 Average training loss: 1.04942
 Testing on *data/mnist_test.csv*:
 Average batch accuracy over test set: 0.866687  
 Average batch loss over test set: 0.96839  
-*Total testing accuracy: 0.8653*
+***Total testing accuracy: 0.8653***
 
