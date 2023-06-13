@@ -29,11 +29,7 @@ Layer::Layer(int input_size, int output_size, int batch_size, std::function<Matr
     // Initialize the activation function and its derivative
     this->activation = activation;
     this->activation_prime = activation_prime;
-
-    // Initialize the activations
-    // a = Matrix(output_size, 1);
-    // z = Matrix(1, output_size);
-
+    
 }
 
 Layer::~Layer() {
@@ -42,11 +38,6 @@ Layer::~Layer() {
 }
 
 Matrix Layer::forward(const Matrix& input) {
-
-    // Print out the shape of the weights, input, and biases
-    // std::cout << "Weights shape: " << weights.shape() << std::endl;
-    // std::cout << "Input shape: " << input.shape() << std::endl;
-    // std::cout << "Biases shape: " << biases.shape() << std::endl;
 
     // Forward propagation
     // z = X * W + b

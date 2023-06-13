@@ -6,10 +6,12 @@
 #include <random>
 #include <iostream>
 
+// Checks if the dimensions match for element-wise operations
 bool dimensionsMatchElementWise(const Matrix &m1, const Matrix &m2) {
     return m1.rows == m2.rows && m1.cols == m2.cols;
 }
 
+// Checks if the dimensions match for matrix multiplication
 bool dimensionsMatchDot(const Matrix &m1, const Matrix &m2) {
     return m1.cols == m2.rows;
 }
@@ -20,6 +22,7 @@ Matrix::Matrix() {
     this->cols = 0;
 }
 
+// Constructor for a matrix of shape (rows, cols) from a uniform distribution between -1 and 1
 Matrix::Matrix(int rows, int cols) {
     // Initialize the data
     MatrixData data = MatrixData(rows, vector<double>(cols, 0.0));
@@ -43,6 +46,7 @@ Matrix::Matrix(int rows, int cols) {
     this->cols = cols;
 }
 
+// Constructor for a matrix of shape (rows, cols) from a vector of vectors
 Matrix::Matrix(MatrixData data) {
     // Set the data
     this->data = data;
@@ -52,6 +56,7 @@ Matrix::Matrix(MatrixData data) {
     this->cols = data[0].size();
 }
 
+// Copy constructor
 Matrix::Matrix(const Matrix &m) {
     // Set the data
     this->data = m.data;
@@ -61,6 +66,7 @@ Matrix::Matrix(const Matrix &m) {
     this->cols = m.cols;
 }
 
+// Returns the shape of the matrix as a string
 std::string Matrix::shape() const {
     // Return the shape of the matrix
     return "[" + std::to_string(this->rows) + "x" + std::to_string(this->cols) + "]";
@@ -78,13 +84,15 @@ std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     return os;
 }
 
+// Getter method for the data
 MatrixData Matrix::getData() const {
     return data;
 }
 
+// Element-wise addition of two matrices
 Matrix Matrix::add(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
-    if (!(m1.rows == m2.rows && m1.cols == m2.cols)) {
+    if (!dimensionsMatchElementWise(m1, m2)) {
         throw std::invalid_argument("Error: Dimensions of matrices do not match for element-wise addition. "
                                     "Attempted operation on matrices of size [" + std::to_string(m1.rows) + "x" + std::to_string(m1.cols) + "] and [" + std::to_string(m2.rows) + "x" + std::to_string(m2.cols) + "].");
     }
@@ -101,9 +109,10 @@ Matrix Matrix::add(const Matrix &m1, const Matrix &m2) {
     return Matrix(data);
 }
 
+// Element-wise subtraction of two matrices
 Matrix Matrix::subtract(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
-    if (!(m1.rows == m2.rows && m1.cols == m2.cols)) {
+    if (!dimensionsMatchElementWise(m1, m2)) {
         throw std::invalid_argument("Error: Dimensions of matrices do not match for element-wise subtraction. "
                                     "Attempted operation on matrices of size [" + std::to_string(m1.rows) + "x" + std::to_string(m1.cols) + "] and [" + std::to_string(m2.rows) + "x" + std::to_string(m2.cols) + "].");
     }
@@ -120,10 +129,10 @@ Matrix Matrix::subtract(const Matrix &m1, const Matrix &m2) {
     return Matrix(data);
 }
 
-
+// Element-wise multiplication of two matrices, also known as the Hadamard product
 Matrix Matrix::multiply(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
-    if (!(m1.rows == m2.rows && m1.cols == m2.cols)) {
+    if (!dimensionsMatchElementWise(m1, m2)) {
         throw std::invalid_argument("Error: Dimensions of matrices do not match for element-wise multiplication. "
                                     "Attempted operation on matrices of size [" + std::to_string(m1.rows) + "x" + std::to_string(m1.cols) + "] and [" + std::to_string(m2.rows) + "x" + std::to_string(m2.cols) + "].");
     }
@@ -140,6 +149,7 @@ Matrix Matrix::multiply(const Matrix &m1, const Matrix &m2) {
     return Matrix(data);
 }
 
+// Divides all elements of a matrix by a scalar
 Matrix Matrix::divide(const Matrix &m1, double scalar) {
 
     if (scalar == 0.0) {
@@ -158,9 +168,10 @@ Matrix Matrix::divide(const Matrix &m1, double scalar) {
     return Matrix(data);
 }
 
+// Matrix multiplication of two matrices
 Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
     // Check if the dimensions match
-    if (!(m1.cols == m2.rows)) {
+    if (!dimensionsMatchDot(m1, m2)) {
         throw std::invalid_argument("Error: Dimensions of matrices do not match for matrix multiplication. "
                                     "Attempted operation on matrices of size [" + std::to_string(m1.rows) + "x" + std::to_string(m1.cols) + "] and [" + std::to_string(m2.rows) + "x" + std::to_string(m2.cols) + "].");
     }
@@ -183,6 +194,7 @@ Matrix Matrix::dot(const Matrix &m1, const Matrix &m2) {
     return Matrix(data);
 }
 
+// Multiplies all elements of a matrix by a scalar
 Matrix Matrix::multiply(double scalar, const Matrix &m) {
     // Initialize the data
     MatrixData data(m.rows, vector<double>(m.cols, 0.0));
@@ -196,6 +208,7 @@ Matrix Matrix::multiply(double scalar, const Matrix &m) {
     return Matrix(data);
 }
 
+// Transposes a matrix
 Matrix Matrix::transpose(const Matrix &m) {
     // Initialize the data
     MatrixData data(m.cols, vector<double>(m.rows, 0.0));
@@ -209,6 +222,7 @@ Matrix Matrix::transpose(const Matrix &m) {
     return Matrix(data);
 }
 
+// Returns the sum of all elements of a matrix
 double Matrix::sum(const Matrix &m) {
     // Initialize the sum
     double sum = 0.0;
@@ -222,6 +236,7 @@ double Matrix::sum(const Matrix &m) {
     return sum;
 }
 
+// Calculates the mean along a given axis
 Matrix Matrix::mean(const Matrix& m, int axis) {
     // Initialize the data
     MatrixData data;
@@ -256,7 +271,7 @@ Matrix Matrix::mean(const Matrix& m, int axis) {
     return Matrix(data);
 }
 
-
+// Returns a slice of the matrix
 Matrix Matrix::slice(int start_row, int end_row) const {
     // Check if start_row and end_row are within the range
     if (start_row < 0 || start_row >= rows || end_row < 0 || end_row > rows || start_row > end_row) {
@@ -275,26 +290,6 @@ Matrix Matrix::slice(int start_row, int end_row) const {
     
     // Return a new Matrix created from the sliced data
     return Matrix(sliced_data);
-}
-
-            
-Matrix Matrix::randomInitialize(Matrix m) {
-    // Get the data from the matrix
-    MatrixData data = m.getData();
-    
-
-    // Initialize the random number generator
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(-1.0, 1.0);
-
-    // Fill the matrix with random values
-    for (int i = 0; i < m.rows; i++) {
-        for (int j = 0; j < m.cols; j++)
-            data[i][j] = dis(gen);
-    }
-
-    return Matrix(data);
 }
 
 // Create matrix of random values from a normal distribution, of a specified shape

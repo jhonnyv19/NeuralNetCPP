@@ -19,15 +19,13 @@ Net::Net(vector<int> sizes, double learning_rate, int batch_size, vector<std::fu
     }
 
     if (activations.size() != num_layers && activation_primes.size() != num_layers) {
-        // std::cout << activations.size() << std::endl;
-        // std::cout << num_layers << std::endl;
         throw std::invalid_argument("Invalid number of activation functions");
     }
 
     // Initialize the layers
     for (int i = 1; i <= num_layers; i++) {
-        // If the layer is the output layer, pass true to the constructor
-        if (i == num_layers) {
+        // If the layer is the output layer and it uses softmax, pass true to the constructor
+        if (i == num_layers && using_softmax) {
             layers.push_back(Layer(sizes[i - 1], sizes[i], batch_size, activations[i - 1], activation_primes[i - 1], true));
         } else {
             layers.push_back(Layer(sizes[i - 1], sizes[i], batch_size, activations[i - 1], activation_primes[i - 1], false));
@@ -61,43 +59,29 @@ void Net::backward(const Matrix& y_hat, const Matrix& y, const Matrix& input) {
     // Calculate derivative of the loss function w.r.t. a
     Matrix dL_da = cross_entropy_loss_prime(y, y_hat);
 
-    // Print shape of dL_da
-    // std::cout << "dL_da shape: " << dL_da.shape() << std::endl;
-
     int batch_size = y_hat.rows;
 
     for (int i = num_layers - 1; i >= 0; i--) {
         Matrix dL_dz;
 
+        // Check if the layer is the output layer and uses softmax
         if (i == num_layers - 1 && layers[i].isSoftmax()) {
+            // Recall that for softmax activation and cross entropy loss, dL_da = y_hat - y
             dL_dz = dL_da;
         } else {
+            // If not softmax, compute dL_dz
             Matrix da_dz = layers[i].activation_prime(layers[i].getZ());
             dL_dz = Matrix::multiply(dL_da, da_dz);
         }
 
-
-        // // Calculate dL_dz = dL_da * da_dz
-        // Matrix da_dz = layers[i].activation_prime(layers[i].getZ());
-
-        // // Print shape of da_dz and dL_da
-        // // std::cout << "da_dz shape: " << da_dz.shape() << std::endl;
-        // // std::cout << "dL_da shape: " << dL_da.shape() << std::endl;
-
-        // Matrix dL_dz = Matrix::multiply(dL_da, da_dz);
-
-        // If not the input layer, we need to calculate dL/da for the next layer
-
-        // Print shape of dL_dz and weights of the current layer
-        // std::cout << "dL_dz shape: " << dL_dz.shape() << std::endl;
-        // std::cout << "Weights shape: " << layers[i].getWeights().shape() << std::endl;
-
+        // Compute the derivative of the loss function w.r.t. the activations of the previous layer
         Matrix dL_da_next_layer;
         if (i > 0) {
             dL_da_next_layer = Matrix::dot(dL_dz, Matrix::transpose(layers[i].getWeights()));
         }
 
         // Compute the Gradients for the Layer's Parameters
+        // dL_dW = dZ_dW^T * dL_dZ
         Matrix d_weights;
         if (i > 0) {
             d_weights = Matrix::dot(Matrix::transpose(layers[i - 1].getActivations()), dL_dz);
@@ -105,27 +89,13 @@ void Net::backward(const Matrix& y_hat, const Matrix& y, const Matrix& input) {
             d_weights = Matrix::dot(Matrix::transpose(input), dL_dz);
         }
 
-        // Shape of d_weights
-        // std::cout << "d_weights shape: " << d_weights.shape() << std::endl;
-
-        // Average the gradients
+        // Average the gradients by dividing by the batch size
         d_weights = Matrix::divide(d_weights, (double)batch_size);
 
-        // Print weights and d_weights, d_bias
-        // std::cout << "Weights: " << layers[i].getWeights() << std::endl;
-        // std::cout << "Bias: " << layers[i].getBiases() << std::endl;
-        // std::cout << "d_weights: " << d_weights << std::endl;
-        // std::cout << "d_bias: " << Matrix::transpose(Matrix::mean(dL_dz, 0)) << std::endl;
-
         // Calculate the gradient of the bias, which is just the mean of dL_dz across the batch dimension
-        Matrix d_bias = Matrix::transpose(Matrix::mean(dL_dz, 0));  // Assuming axis argument represents the axis along which to compute the mean
+        Matrix d_bias = Matrix::transpose(Matrix::mean(dL_dz, 0));
 
-        // Shape of d_bias
-        // std::cout << "d_bias shape: " << d_bias.shape() << std::endl;
-
-        
-
-        // Update the Parameters
+        // Update the parameters of the layer
         layers[i].updateWeights(learning_rate, d_weights);
         layers[i].updateBiases(learning_rate, d_bias);
 

@@ -12,6 +12,7 @@
 #include "activations.hpp"
 #include "net.hpp"
 
+// Shuffles the data and labels in the same order
 std::pair<std::vector<int>, std::vector<std::vector<double>>> shuffle(const std::vector<int>& labels, const std::vector<std::vector<double>>& data) {
     assert(labels.size() == data.size());  // make sure we have the same amount of data and labels
     
@@ -35,13 +36,14 @@ std::pair<std::vector<int>, std::vector<std::vector<double>>> shuffle(const std:
     return {shuffled_labels, shuffled_data};
 }
 
-
+// Converts a value to a one-hot vector
 std::vector<double> to_one_hot(int value, int num_classes) {
     std::vector<double> one_hot(num_classes, 0.0);
     one_hot[value] = 1.0;
     return one_hot;
 }
 
+// Loads the MNIST dataset
 std::pair<std::vector<int>, std::vector<std::vector<double>>> load_csv(const std::string &path) {
     std::ifstream indata;
     indata.open(path);
@@ -75,62 +77,42 @@ std::pair<std::vector<int>, std::vector<std::vector<double>>> load_csv(const std
 }
 
 int main(int argc, char** argv) {
-    // Create the network, first and last arguments are the input and output sizes, respectively
+    // Define the hyperparameters
     int input_size = 28 * 28;
-    vector<int> sizes = {input_size, input_size, 10};
-    double lr = 0.01;
-
-    // Batch size
+    vector<int> sizes = {input_size, 500, 10};
+    double lr = 0.001;
     int batch_size = 32;
 
     // Apply relu activation to the first layer and sigmoid activation to the second layer
     vector<std::function<Matrix(const Matrix&)>> activations = {relu, softmax};
     vector<std::function<Matrix(const Matrix&)>> activation_primes = {relu_prime, softmax_prime};
     
+    // Create the neural network
     Net net(sizes, lr, batch_size, activations, activation_primes, true);
 
-    // Create a single input and label with a batch dimension as a Matrix object
-    // Matrix inputs = Matrix::randomNormal(batch_size, input_size, 0.0, 1.0);
-    // Matrix label = Matrix::randomNormal(batch_size, sizes.back(), 0.0, 1.0);
-
-    // std::cout << "Input: " << inputs << std::endl;
-
-
-    // Matrix out = net.forward(inputs);
-
-    // std::cout << "Output: " << out << std::endl;
-
-    // Matrix loss = cross_entropy_loss(label, out);
-    // std::cout << "Loss: " << loss << std::endl;
-    
-    // std::cout << "Label: " << label << std::endl;
-    // net.backward(out, label, inputs);
-
-    // Print the loss, output and label
-
+    // Load the MNIST dataset
     auto [labels, data] = load_csv("data/mnist_train.csv");
     Matrix mnist_data(data);
-    std::vector<std::vector<double>> one_hot_labels;
-    
-    for (const auto& label : labels) {
-        one_hot_labels.push_back(to_one_hot(label, 10));  // Assuming 10 classes for MNIST
-    }
 
     // Numbers of epochs
     int epochs = 1;
 
+    // Print every certain number of batches
+    int print_every = 100;
+
     // Batch gradient descent
     for (int i = 0; i < epochs; i++) {
         // Shuffle training data and labels before each epoch
-        // Implement the shuffle function as per your requirement
         auto [shuffled_labels, shuffled_data] = shuffle(labels, data);
         Matrix shuffled_mnist_data(shuffled_data);
         std::vector<std::vector<double>> shuffled_one_hot_labels;
     
+        // Convert the labels to one-hot vectors
         for (const auto& label : shuffled_labels) {
             shuffled_one_hot_labels.push_back(to_one_hot(label, 10));  // Assuming 10 classes for MNIST
         }
 
+        // Calculate the number of batches
         int num_batches = shuffled_mnist_data.rows / batch_size;
 
         // Store the loss for each batch in a vector
@@ -142,35 +124,20 @@ int main(int argc, char** argv) {
         for (int j = 0; j < num_batches; j++) {
             int start = j * batch_size;
             int end = std::min(start + batch_size, shuffled_mnist_data.rows);
+
+            // Get the batch inputs and batch labels
             Matrix batch_inputs = shuffled_mnist_data.slice(start, end);
             std::vector<std::vector<double>> batch_labels(shuffled_one_hot_labels.begin() + start, shuffled_one_hot_labels.begin() + end);
-
-            // Transpose the batch_inputs and batch_labels matrices
-            // batch_inputs = Matrix::transpose(batch_inputs);
             Matrix batch_label(batch_labels);
-            // batch_label = Matrix::transpose(batch_label);
 
-            // Print out the shape of the batch_inputs and batch_labels matrices
-            // std::cout << "Batch inputs shape: " << batch_inputs.shape() << std::endl;
-            // std::cout << "Batch labels shape: " << batch_label.shape() << std::endl;
-
-            // Forward and backward propagation
+            // Forward pass through the network
             Matrix out = net.forward(batch_inputs);
-
-            // Print the contents of the output matrix
-            // std::cout << "Output matrix: " << out << std::endl;
-
-            // std::cout << "Beginning backward propagation" << std::endl;
-            net.backward(out, batch_label, batch_inputs);
-
-            // Compute loss for the batch and print it
+            
+            // Compute loss for the batch
             Matrix loss = cross_entropy_loss(batch_label, out);
 
-            // std::cout << "Shape of loss: " << loss.shape() << std::endl;
-
-            double avg_loss = 0.0;
-
             // Calculate average loss over each batch
+            double avg_loss = 0.0;
             for (int k = 0; k < loss.rows; k++) {
                 avg_loss += loss.getData()[k][0];
             }
@@ -180,16 +147,17 @@ int main(int argc, char** argv) {
             // Add the average loss to the losses vector
             losses.push_back(avg_loss);
 
-            // double average_loss = Matrix::mean(loss, 0).getData()[0][0];
-
-            // Only print every 100 batches
-            if (j % 100 == 0) {
+            // Only print every certain number batches
+            if (j % print_every == 0) {
                 std::cout << "Batch " << j << " Loss: " << avg_loss << std::endl;
             }
 
+            // Backpropagate the loss and update the weights and biases
+            net.backward(out, batch_label, batch_inputs);
+
         }
 
-        // Print the average loss over the epoch
+        // Compute the average loss over the epoch
         double avg_loss_epoch = 0.0;
         for (const auto& loss : losses) {
             avg_loss_epoch += loss;
@@ -209,12 +177,13 @@ int main(int argc, char** argv) {
     auto [test_labels, test_data] = load_csv("data/mnist_test.csv");
     Matrix test_mnist_data(test_data);
 
+    // Convert the labels to one-hot vectors
     std::vector<std::vector<double>> test_one_hot_labels;
-
     for (const auto& label : test_labels) {
         test_one_hot_labels.push_back(to_one_hot(label, 10));  // Assuming 10 classes for MNIST
     }
 
+    // Calculate the number of batches
     int num_test_batches = test_mnist_data.rows / batch_size;
 
     // Collect the total number of correct predictions
@@ -226,19 +195,24 @@ int main(int argc, char** argv) {
     // Collect losses for each batch to calculate the average loss
     std::vector<double> test_losses;
 
-
+    // Iterate over each batch
     for (int i = 0; i < num_test_batches; i++) {
+        
+        // Store the number of correct predictions for each batch
         int correct = 0;
+
+        // Get the batch inputs and batch labels
         int start = i * batch_size;
         int end = std::min(start + batch_size, test_mnist_data.rows);
         Matrix batch_inputs = test_mnist_data.slice(start, end);
-        std::vector<std::vector<double>> batch_labels(test_one_hot_labels.begin() + start, test_one_hot_labels.begin() + end);
 
+        std::vector<std::vector<double>> batch_labels(test_one_hot_labels.begin() + start, test_one_hot_labels.begin() + end);
         Matrix batch_label(batch_labels);
 
+        // Forward pass through the network
         Matrix out = net.forward(batch_inputs);
 
-        // Iterate over each row of the output matrix
+        // Iterate over each row of the output matrix to find the index of the maximum value
         for (int j = 0; j < out.rows; j++) {
 
             // Find the index of the maximum value in the row
@@ -279,7 +253,7 @@ int main(int argc, char** argv) {
         test_losses.push_back(avg_loss);
 
         // Print the average accuracy and loss for the batch
-        std::cout << "Batch: " << i << " Accuracy: " << (double)correct / batch_size << " Loss: " << avg_loss << std::endl;
+        std::cout << "Batch " << i << " Accuracy: " << (double)correct / batch_size << " Loss: " << avg_loss << std::endl;
 
     }
 
