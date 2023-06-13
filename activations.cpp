@@ -120,4 +120,3 @@ Matrix cross_entropy_loss_prime(const Matrix& y, const Matrix& y_hat) {
     return Matrix(result);
 
 }
-
