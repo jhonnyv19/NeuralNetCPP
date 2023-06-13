@@ -4,6 +4,8 @@ I decided to start this project as a way for me to gain a deeper intution of the
 
 Before running the project, make sure you have the MNIST dataset downloaded as a CSV file. I recommend using the MNIST dataset from Kaggle, which can be found here: https://www.kaggle.com/datasets/oddrationale/mnist-in-csv
 
+Place the two csv files (mnist_train.csv & mnist_test.csv) in a folder called data, which should be in the same directory as the main.cpp file.
+
 To compile you can use the following command:
 ``` 
 clang++ -O3 -std=c++17 -o net layer.cpp matrix.cpp net.cpp main.cpp activations.cpp 
