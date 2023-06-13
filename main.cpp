@@ -119,8 +119,6 @@ int main(int argc, char** argv) {
     // Numbers of epochs
     int epochs = 1;
 
-
-
     // Batch gradient descent
     for (int i = 0; i < epochs; i++) {
         // Shuffle training data and labels before each epoch
@@ -139,7 +137,7 @@ int main(int argc, char** argv) {
         std::vector<double> losses;
 
         // Print epoch number
-        std::cout << "\nEpoch: " << i + 1 << std::endl;
+        std::cout << "\nEpoch " << i + 1 << std::endl;
         
         for (int j = 0; j < num_batches; j++) {
             int start = j * batch_size;
@@ -186,7 +184,7 @@ int main(int argc, char** argv) {
 
             // Only print every 100 batches
             if (j % 100 == 0) {
-                std::cout << "Batch: " << j << " Loss: " << avg_loss << std::endl;
+                std::cout << "Batch " << j << " Loss: " << avg_loss << std::endl;
             }
 
         }
@@ -200,9 +198,12 @@ int main(int argc, char** argv) {
         avg_loss_epoch /= losses.size();
 
         // Print epoch number and average loss
-        std::cout << "Epoch: " << i + 1 << " Average loss: " << avg_loss_epoch << std::endl;
+        std::cout << "Epoch " << i + 1 << " Average loss: " << avg_loss_epoch << std::endl;
 
     }
+
+    // Print beginning of test phase
+    std::cout << "\nBeginning model testing on data/mnist_test.csv" << std::endl;
 
     // Load the test data and evaluate the model accuracy
     auto [test_labels, test_data] = load_csv("data/mnist_test.csv");
@@ -215,6 +216,9 @@ int main(int argc, char** argv) {
     }
 
     int num_test_batches = test_mnist_data.rows / batch_size;
+
+    // Collect the total number of correct predictions
+    int total_correct = 0;
 
     // Collect accuracy for each batch to calculate the average accuracy
     std::vector<double> accuracies;
@@ -234,47 +238,74 @@ int main(int argc, char** argv) {
 
         Matrix out = net.forward(batch_inputs);
 
-        // Calculate the accuracy
+        // Iterate over each row of the output matrix
         for (int j = 0; j < out.rows; j++) {
+
+            // Find the index of the maximum value in the row
             int max_index = 0;
             double max_val = out.getData()[j][0];
 
             for (int k = 0; k < out.cols; k++) {
                 if (out.getData()[j][k] > max_val) {
+                    // Update the max value and index if a new max value is found
                     max_val = out.getData()[j][k];
                     max_index = k;
                 }
             }
 
+            // If the index of the maximum value is equal to the index of the one-hot label, increment correct
             if (batch_label.getData()[j][max_index] == 1.0) {
                 correct++;
+                total_correct++;
             }
         }
 
         // Add the accuracy to the accuracies vector
-        accuracies.push_back((double)correct / batch_size);
+        double batch_accuracy = (double)correct / batch_size;
+        accuracies.push_back(batch_accuracy);
 
         // Calculate loss for the batch
-        Matrix loss = cross_entropy_loss(batch_label, out);
+        Matrix batch_loss = cross_entropy_loss(batch_label, out);
 
         // Calculate average loss for the batch
         double avg_loss = 0.0;
-        for (int k = 0; k < loss.rows; k++) {
-            avg_loss += loss.getData()[k][0];
+        for (int k = 0; k < batch_loss.rows; k++) {
+            avg_loss += batch_loss.getData()[k][0];
         }
 
-        avg_loss /= loss.rows;
+        avg_loss /= batch_loss.rows;
 
         // Add the average loss to the losses vector
         test_losses.push_back(avg_loss);
 
         // Print the average accuracy and loss for the batch
-        if (i % 100 == 0) {
-            std::cout << "Batch: " << i << " Accuracy: " << (double)correct / batch_size << " Loss: " << avg_loss << std::endl;
-        }
+        std::cout << "Batch: " << i << " Accuracy: " << (double)correct / batch_size << " Loss: " << avg_loss << std::endl;
 
     }
 
+    // Calculate the average accuracy over the test set
+    double avg_accuracy = 0.0;
+    for (const auto& accuracy : accuracies) {
+        avg_accuracy += accuracy;
+    }
+
+    avg_accuracy /= accuracies.size();
+
+    // Calculate the average loss over the test set
+    double avg_loss = 0.0;
+    for (const auto& loss : test_losses) {
+        avg_loss += loss;
+    }
+
+    avg_loss /= test_losses.size();
+
+    // Print the average accuracy and loss over the test set
+    std::cout << "\nAverage accuracy over test set: " << avg_accuracy << std::endl;
+    std::cout << "Average loss over test set: " << avg_loss << std::endl;
+
+    // Calculate and print total accuracy
+    double total_accuracy = (double)total_correct / test_mnist_data.rows;
+    std::cout << "Total accuracy: " << total_accuracy << std::endl;
 
 
     return 0;
