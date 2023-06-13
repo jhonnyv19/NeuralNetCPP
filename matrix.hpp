@@ -39,9 +39,6 @@ class Matrix {
         static double sum(const Matrix &m);
         static Matrix mean(const Matrix& m, int axis);
         Matrix slice(int start_row, int end_row) const;
-        
-        // Random intialization for a bias vector
-        static Matrix randomInitialize(Matrix m);
 
         // Create matrix of random values from a normal distribution, of a specified shape
         static Matrix randomNormal(int rows, int cols, double mean, double stddev);

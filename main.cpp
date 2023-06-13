@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
     // Define the hyperparameters
     int input_size = 28 * 28;
     vector<int> sizes = {input_size, 500, 10};
-    double lr = 0.001;
+    double lr = 0.003;
     int batch_size = 32;
 
     // Apply relu activation to the first layer and sigmoid activation to the second layer
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     Matrix mnist_data(data);
 
     // Numbers of epochs
-    int epochs = 1;
+    int epochs = 5;
 
     // Print every certain number of batches
     int print_every = 100;
@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
 
             // Only print every certain number batches
             if (j % print_every == 0) {
-                std::cout << "Batch " << j << " Loss: " << avg_loss << std::endl;
+                std::cout << "Batch " << j + 1 << " Loss: " << avg_loss << std::endl;
             }
 
             // Backpropagate the loss and update the weights and biases
@@ -252,8 +252,10 @@ int main(int argc, char** argv) {
         // Add the average loss to the losses vector
         test_losses.push_back(avg_loss);
 
-        // Print the average accuracy and loss for the batch
-        std::cout << "Batch " << i << " Accuracy: " << (double)correct / batch_size << " Loss: " << avg_loss << std::endl;
+        // Print the average accuracy and loss every 10 batches
+        if (i % 20 == 0){
+            std::cout << "Batch " << i + 1 << " Accuracy: " << (double)correct / batch_size << " Loss: " << avg_loss << std::endl;
+        }
 
     }
 
